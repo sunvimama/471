@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Starred Notes</title>
+</head>
+<body>
+    <h1>⭐ My Starred Notes</h1>
+    {% if notes %}
+        <ul>
+            {% for note in notes %}
+                <li>
+                    <h3>{{ note.Title }}</h3>
+                    <p>{{ note.des }}</p>
+                    <a href="{{ url_for('notepad', note_id=note.id) }}">View Note</a>
+
+                    <!-- Display Comments -->
+                    <h4>Comments:</h4>
+                    {% if note.comments %}
+                        <ul>
+                            {% for comment in note.comments %}
+                                <li>
+                                    <strong>{{ comment.user.username }}:</strong> {{ comment.content }}
+                                    <small>({{ comment.timestamp.strftime('%Y-%m-%d %H:%M:%S') }})</small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No comments yet.</p>
+                    {% endif %}
+
+                    <!-- Add Comment Form -->
+                    <form action="{{ url_for('add_comment', note_id=note.id) }}" method="POST">
+                        <textarea name="comment" placeholder="Leave a comment..." required></textarea>
+                        <button type="submit">Submit</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven’t starred any notes yet.</p>
+    {% endif %}
+</body>
+</html>

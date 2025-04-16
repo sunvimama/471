@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All Notes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .note-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px auto;
+            max-width: 700px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .note-title {
+            font-weight: bold;
+            font-size: 1.4em;
+            margin-bottom: 8px;
+        }
+
+        .note-meta {
+            color: #777;
+            font-size: 0.9em;
+            margin-bottom: 12px;
+        }
+
+        .note-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        a.button,
+        .note-actions button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 6px 12px;
+            text-decoration: none;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        a.button:hover,
+        .note-actions button:hover {
+            background-color: #45a049;
+        }
+
+        .star-btn {
+            background-color: #f39c12;
+        }
+
+        .star-btn:hover {
+            background-color: #e67e22;
+        }
+
+        .unstar-btn {
+            background-color: #7f8c8d;
+        }
+
+        .unstar-btn:hover {
+            background-color: #95a5a6;
+        }
+    </style>
+</head>
+<body>
+    <h1>All Notes</h1>
+
+    {% for note in notes %}
+    <div class="note-card">
+        <div class="note-title">{{ note.Title }}</div>
+        <div class="note-meta">
+            Tags: {{ note.tags }} | Category: {{ note.categories }}
+        </div>
+        <p>{{ note.des }}</p>
+
+        <div class="note-actions">
+            <a class="button" href="{{ url_for('notepad', note_id=note.id) }}">📝 View Note</a>
+
+            {% if note.starred %}
+            <form action="{{ url_for('unstar_note', note_id=note.id) }}" method="POST" style="display:inline;">
+                <button type="submit" class="unstar-btn">❌ Unstar</button>
+            </form>
+            {% else %}
+            <form action="{{ url_for('star_note', note_id=note.id) }}" method="POST" style="display:inline;">
+                <button type="submit" class="star-btn">⭐ Star</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+        <p>No notes found.</p>
+    {% endfor %}
+</body>
+</html>
