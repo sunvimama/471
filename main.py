@@ -19,6 +19,18 @@ migrate = Migrate(app, db)
 # -----------------------------
 # Models
 # -----------------------------
+class Course(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    videos = db.relationship('CourseVideo', backref='course', lazy=True)
+
+class CourseVideo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    week = db.Column(db.Integer, nullable=False)  # Week number (1, 2, 3)
+    title = db.Column(db.String(100), nullable=False)
+    file_path = db.Column(db.String(255), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
 
 class notes(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -55,6 +67,26 @@ class Comments(db.Model):
     user = db.relationship('users', backref='comments')
     note = db.relationship('notes', backref='comments')
 
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    message = db.Column(db.String(255), nullable=False)
+    is_read = db.Column(db.Boolean, default=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    timestamp = db.Column(db.DateTime, default=db.func.now())
+
+    user = db.relationship('users', backref='notifications')
+
+
+class ActivityLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    activity_type = db.Column(db.String(100), nullable=False)  # e.g., 'opened_note'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    note_id = db.Column(db.Integer, db.ForeignKey('notes.id'), nullable=True)
+    course_id = db.Column(db.Integer, nullable=True)
+    timestamp = db.Column(db.DateTime, default=db.func.now())
+
+    user = db.relationship('users', backref='activity_logs')
+    note = db.relationship('notes', backref='activity_logs')
 # New model for storing uploaded videos
 class Video(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -270,6 +302,93 @@ def course(video_id):
         print("Note saved:", note_content)
         return redirect(url_for('course', video_id=video_id))
     return render_template('course_video.html', video=video_item)
+
+@app.route('/notifications')
+def notifications():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    notifs = Notification.query.filter_by(user_id=user_id).order_by(Notification.timestamp.desc()).all()
+    return render_template('notifications.html', notifications=notifs)
+@app.route('/activity')
+def activity():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    # Fetch activity logs
+    logs = ActivityLog.query.filter_by(user_id=user_id).order_by(ActivityLog.timestamp.desc()).all()
+
+    # Mark all notifications as read
+    Notification.query.filter_by(user_id=user_id, is_read=False).update({'is_read': True})
+    db.session.commit()
+
+    return render_template('activity.html', activities=logs)
+
+@app.route('/upload_course', methods=['GET', 'POST'])
+def upload_course():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        course_title = request.form['course_title']
+        user_id = session['user_id']
+        video_files = {
+            1: request.files.get('week1_video'),
+            2: request.files.get('week2_video'),
+            3: request.files.get('week3_video')
+        }
+
+        new_course = Course(title=course_title, user_id=user_id)
+        db.session.add(new_course)
+        db.session.commit()
+
+        for week, file in video_files.items():
+            if file:
+                filename = secure_filename(file.filename)
+                path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(path)
+                relative_path = path.replace(os.sep, '/')
+
+                course_video = CourseVideo(
+                    week=week,
+                    title=f"Week {week} Video",
+                    file_path=relative_path,
+                    course_id=new_course.id
+                )
+                db.session.add(course_video)
+
+        db.session.commit()
+        return redirect(url_for('index'))
+
+    return render_template('upload_course.html')
+
+@app.route('/view_course/<int:course_id>')
+def view_course(course_id):
+    course = Course.query.get_or_404(course_id)
+    videos = CourseVideo.query.filter_by(course_id=course_id).order_by(CourseVideo.week.asc()).all()
+
+    # Group videos by week
+    week_videos = {1: [], 2: [], 3: []}
+    for video in videos:
+        week_videos.setdefault(video.week, []).append(video)
+
+    return render_template('view_course.html', course=course, week_videos=week_videos)
+
+@app.route('/courses')
+def courses():
+    all_courses = Course.query.all()
+    return render_template('courses.html', courses=all_courses)
+
+@app.context_processor
+def inject_notifications_count():
+    if 'user_id' in session:
+        user_id = session['user_id']
+        notifications_count = Notification.query.filter_by(user_id=user_id, is_read=False).count()
+        return {'notifications_count': notifications_count}
+    return {'notifications_count': 0}
+
 
 with app.app_context():
     db.create_all()

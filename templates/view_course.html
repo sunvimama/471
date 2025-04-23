@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}{{ course.title }}{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<style>
+    .container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        background-color: #1a1a1a;
+        color: white;
+    }
+
+    .content {
+        display: flex;
+        flex: 1;
+    }
+
+    .video-section {
+        flex: 2;
+        background: black;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .video-section video {
+        width: 100%;
+        max-height: 90%;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    .notes-section {
+        flex: 1;
+        padding: 20px;
+        border-left: 2px solid #ccc;
+        display: none;
+        flex-direction: column;
+        background-color: #f9f9f9;
+    }
+
+    .notes-section.active {
+        display: flex;
+    }
+
+    #editor-container {
+        flex: 1;
+        height: 300px;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+    }
+
+    .note-controls {
+        margin-top: 10px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    button {
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        margin-left: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+    select {
+        margin: 20px;
+        padding: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="top-bar">
+        <h2>{{ course.title }}</h2>
+        <div>
+            <select id="videoSelector">
+                {% for week, videos in week_videos.items() %}
+                    {% for video in videos %}
+                        <option value="{{ url_for('static', filename=video.file_path.split('static/')[-1]) }}">
+                            Week {{ week }} - {{ video.title }}
+                        </option>
+                    {% endfor %}
+                {% endfor %}
+            </select>
+            <button id="toggleNotesBtn">Take Notes</button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="video-section">
+            <video id="courseVideo" controls>
+                <source id="videoSource" src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <div class="notes-section" id="notesSection">
+            <!-- Quill Editor -->
+            <div id="toolbar-container">
+                <span class="ql-formats">
+                    <select class="ql-header"></select>
+                    <select class="ql-font"></select>
+                </span>
+                <span class="ql-formats">
+                    <button class="ql-bold"></button>
+                    <button class="ql-italic"></button>
+                    <button class="ql-underline"></button>
+                    <button class="ql-strike"></button>
+                </span>
+                <span class="ql-formats">
+                    <select class="ql-color"></select>
+                    <select class="ql-background"></select>
+                </span>
+                <span class="ql-formats">
+                    <button class="ql-clean"></button>
+                </span>
+            </div>
+            <div id="editor-container"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    const toggleBtn = document.getElementById('toggleNotesBtn');
+    const notesSection = document.getElementById('notesSection');
+    const videoSelector = document.getElementById('videoSelector');
+    const videoSource = document.getElementById('videoSource');
+    const videoElement = document.getElementById('courseVideo');
+
+    toggleBtn.addEventListener('click', () => {
+        notesSection.classList.toggle('active');
+    });
+
+    const quill = new Quill('#editor-container', {
+        modules: { toolbar: '#toolbar-container' },
+        theme: 'snow'
+    });
+
+    videoSelector.addEventListener('change', () => {
+        videoSource.src = videoSelector.value;
+        videoElement.load();
+    });
+
+    // Auto load first video on page load
+    if (videoSelector.options.length > 0) {
+        videoSource.src = videoSelector.value;
+        videoElement.load();
+    }
+</script>
+{% endblock %}
