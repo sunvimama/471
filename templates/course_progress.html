@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Course Progress{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="progress-header">
+        <h2>{{ course.title }} - Course Progress</h2>
+    </div>
+    
+    <div class="progress-overview">
+        <h3>Progress Overview</h3>
+        <div class="progress-cards">
+            {% for progress in progress_data %}
+                <div class="progress-card">
+                    <div class="week-info">
+                        <h4>Week {{ progress.week }}</h4>
+                        <div class="status">
+                            {% if progress.is_completed %}
+                                <span class="status-completed">Completed</span>
+                            {% else %}
+                                <span class="status-incomplete">Incomplete</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .container {
+        padding: 20px;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .progress-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .progress-header h2 {
+        font-size: 36px;
+        color: #333;
+    }
+
+    .progress-overview h3 {
+        font-size: 28px;
+        color: #555;
+        margin-bottom: 20px;
+    }
+
+    .progress-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .progress-card {
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .progress-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .week-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .week-info h4 {
+        font-size: 22px;
+        color: #333;
+    }
+
+    .status {
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .status-completed {
+        color: green;
+    }
+
+    .status-incomplete {
+        color: red;
+    }
+
+    @media (max-width: 768px) {
+        .progress-cards {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .progress-cards {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

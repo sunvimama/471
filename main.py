@@ -3,12 +3,18 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, s
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from werkzeug.utils import secure_filename
+from flask_login import LoginManager, UserMixin, current_user
+from flask_login import login_required
+
+
+login_manager = LoginManager()
 
 local_server = True
 app = Flask(__name__)
 app.secret_key = 'sunvi'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/suh'  # Replace with your actual DB URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+login_manager.init_app(app)
 
 # Set the upload folder for videos. Make sure the folder exists.
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads', 'videos')
@@ -19,6 +25,16 @@ migrate = Migrate(app, db)
 # -----------------------------
 # Models
 # -----------------------------
+class CourseProgress(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
+    week = db.Column(db.Integer, nullable=False)  # 1, 2, or 3
+    is_completed = db.Column(db.Boolean, default=False)
+
+    user = db.relationship('users', backref='course_progress')
+    course = db.relationship('Course', backref='progress')
+
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
@@ -49,7 +65,7 @@ class StarredNote(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     note_id = db.Column(db.Integer, db.ForeignKey('notes.id'), nullable=False)
 
-class users(db.Model):
+class users(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
@@ -95,6 +111,10 @@ class Video(db.Model):
     file_path = db.Column(db.String(255), nullable=False)
     course_id = db.Column(db.Integer, nullable=True)  # Optional: assign course if needed
 
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 # -----------------------------
 # Routes
 # -----------------------------
@@ -367,6 +387,10 @@ def upload_course():
 
 @app.route('/view_course/<int:course_id>')
 def view_course(course_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
     course = Course.query.get_or_404(course_id)
     videos = CourseVideo.query.filter_by(course_id=course_id).order_by(CourseVideo.week.asc()).all()
 
@@ -375,7 +399,72 @@ def view_course(course_id):
     for video in videos:
         week_videos.setdefault(video.week, []).append(video)
 
-    return render_template('view_course.html', course=course, week_videos=week_videos)
+    # Get user's completed weeks
+    completed_weeks = [
+        progress.week for progress in CourseProgress.query.filter_by(user_id=user_id, course_id=course_id, is_completed=True)
+    ]
+
+    return render_template('view_course.html', course=course, week_videos=week_videos, completed_weeks=completed_weeks)
+
+@app.route('/mark_week_complete/<int:course_id>/<int:week>', methods=['POST'])
+def mark_week_complete(course_id, week):
+    if 'user_id' not in session:
+        return jsonify({'error': 'User not logged in'}), 401  # Return error if not logged in
+
+    user_id = session['user_id']
+
+    # Check if progress already exists
+    progress = CourseProgress.query.filter_by(user_id=user_id, course_id=course_id, week=week).first()
+
+    try:
+        if not progress:
+            # If no progress exists, create a new one
+            progress = CourseProgress(user_id=user_id, course_id=course_id, week=week, is_completed=True)
+            db.session.add(progress)
+            db.session.commit()  # Commit to save changes
+        else:
+            # If progress exists, just mark it as completed
+            progress.is_completed = True
+            db.session.commit()
+
+        return jsonify({'message': f'Week {week} of Course {course_id} marked as completed.'}), 200
+
+    except Exception as e:
+        # Handle any potential errors
+        print(f"Error: {e}")
+        db.session.rollback()  # Rollback any changes if an error occurs
+        return jsonify({'error': 'An error occurred while marking the week as complete.'}), 500
+
+
+    db.session.commit()
+    return redirect(url_for('view_course', course_id=course_id))
+@app.route('/track_progress', methods=['POST'])
+@login_required
+def track_progress():
+    data = request.get_json()
+    course_id = data.get('course_id')
+    week = data.get('week')
+    
+    # Check if entry exists
+    progress = CourseProgress.query.filter_by(
+        user_id=current_user.id,
+        course_id=course_id,
+        week=week
+    ).first()
+
+    if not progress:
+        progress = CourseProgress(
+            user_id=current_user.id,
+            course_id=course_id,
+            week=week,
+            is_completed=True
+        )
+        db.session.add(progress)
+    else:
+        progress.is_completed = True
+
+    db.session.commit()
+    return jsonify({"status": "success"})
 
 @app.route('/courses')
 def courses():
@@ -409,6 +498,16 @@ def subscription_status():
     return render_template('subscription_status.html', 
                            subscription_message=subscription_message, 
                            session_link=session_link)
+@app.route('/course_progress/<int:course_id>', methods=['GET'])
+def course_progress(course_id):
+    # Fetch the course by its ID
+    course = Course.query.get_or_404(course_id)
+    
+    # Fetch the progress data for the course
+    progress_data = CourseProgress.query.filter_by(course_id=course_id).all()
+    
+    # Render the course progress page with course and progress data
+    return render_template('course_progress.html', course=course, progress_data=progress_data)
 
 
 with app.app_context():

@@ -19,7 +19,7 @@
         color: white;
     }
 
-    .content {
+    .content { 
         display: flex;
         flex: 1;
     }
@@ -85,6 +85,20 @@
         margin: 20px;
         padding: 5px;
     }
+
+    .complete-week-btn {
+        margin: 10px 20px;
+        padding: 5px 10px;
+        background-color: #28a745;
+        border: none;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .complete-week-btn:hover {
+        background-color: #218838;
+    }
 </style>
 {% endblock %}
 
@@ -96,7 +110,7 @@
             <select id="videoSelector">
                 {% for week, videos in week_videos.items() %}
                     {% for video in videos %}
-                        <option value="{{ url_for('static', filename=video.file_path.split('static/')[-1]) }}">
+                        <option value="{{ url_for('static', filename=video.file_path.split('static/')[-1]) }}" data-week="{{ week }}">
                             Week {{ week }} - {{ video.title }}
                         </option>
                     {% endfor %}
@@ -115,7 +129,6 @@
         </div>
 
         <div class="notes-section" id="notesSection">
-            <!-- Quill Editor -->
             <div id="toolbar-container">
                 <span class="ql-formats">
                     <select class="ql-header"></select>
@@ -138,6 +151,8 @@
             <div id="editor-container"></div>
         </div>
     </div>
+
+    <button id="completeWeekBtn" class="complete-week-btn">Mark This Week Complete</button>
 </div>
 {% endblock %}
 
@@ -149,6 +164,7 @@
     const videoSelector = document.getElementById('videoSelector');
     const videoSource = document.getElementById('videoSource');
     const videoElement = document.getElementById('courseVideo');
+    const completeWeekBtn = document.getElementById('completeWeekBtn');
 
     toggleBtn.addEventListener('click', () => {
         notesSection.classList.toggle('active');
@@ -160,7 +176,8 @@
     });
 
     videoSelector.addEventListener('change', () => {
-        videoSource.src = videoSelector.value;
+        const selectedOption = videoSelector.options[videoSelector.selectedIndex];
+        videoSource.src = selectedOption.value;
         videoElement.load();
     });
 
@@ -169,5 +186,32 @@
         videoSource.src = videoSelector.value;
         videoElement.load();
     }
+
+    completeWeekBtn.addEventListener('click', () => {
+        const selectedOption = videoSelector.options[videoSelector.selectedIndex];
+        const week = selectedOption.getAttribute('data-week');
+        const courseId = {{ course.id }}; // Ensure this is rendered correctly on the page
+
+        // Use the correct URL format for the GET request
+        fetch(`/mark_week_complete/${courseId}/${week}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({}) // Send an empty body or any relevant data if needed
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message); // Show the server message
+            } else {
+                alert("Week marked as complete.");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Something went wrong.");
+        });
+    });
 </script>
 {% endblock %}
