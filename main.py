@@ -53,6 +53,7 @@ class users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
+    is_subscribed = db.Column(db.Boolean, default=False)  # Track subscription status
     starred_notes = db.relationship('StarredNote', backref='user', lazy=True)
 
 class Comments(db.Model):
@@ -388,6 +389,26 @@ def inject_notifications_count():
         notifications_count = Notification.query.filter_by(user_id=user_id, is_read=False).count()
         return {'notifications_count': notifications_count}
     return {'notifications_count': 0}
+
+@app.route('/subscription_status')
+def subscription_status():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    user = users.query.get(user_id)
+
+    # Check if the user is subscribed
+    if user.is_subscribed:
+        subscription_message = "You are subscribed! Here is your personal session link."
+        session_link = "https://example.com/your-personal-session-link"
+    else:
+        subscription_message = "You are not subscribed. Please subscribe to access one-on-one sessions."
+        session_link = None
+
+    return render_template('subscription_status.html', 
+                           subscription_message=subscription_message, 
+                           session_link=session_link)
 
 
 with app.app_context():

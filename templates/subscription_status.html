@@ -1,0 +1,13 @@
+<!-- templates/subscription_status.html -->
+{% extends 'base.html' %}
+
+{% block title %}Subscription Status{% endblock %}
+
+{% block content %}
+    <h1>{{ subscription_message }}</h1>
+    {% if session_link %}
+        <a href="{{ session_link }}" target="_blank">Access your personal session</a>
+    {% else %}
+        <p><a href="/subscribe">Click here to subscribe</a></p>
+    {% endif %}
+{% endblock %}
