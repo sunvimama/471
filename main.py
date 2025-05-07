@@ -5,6 +5,9 @@ from flask_migrate import Migrate
 from werkzeug.utils import secure_filename
 from flask_login import LoginManager, UserMixin, current_user
 from flask_login import login_required
+from datetime import datetime
+from flask import flash
+
 
 
 login_manager = LoginManager()
@@ -111,6 +114,16 @@ class Video(db.Model):
     file_path = db.Column(db.String(255), nullable=False)
     course_id = db.Column(db.Integer, nullable=True)  # Optional: assign course if needed
 
+class Payment(db.Model):
+    __tablename__ = 'payments'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    card_name = db.Column(db.String(100), nullable=False)
+    card_number = db.Column(db.String(16), nullable=False)  # ideally masked/stored securely
+    amount = db.Column(db.Float, nullable=False)
+    expiry = db.Column(db.String(5), nullable=False)  # Format: MM/YY
+    cvv = db.Column(db.String(3), nullable=False)     # never store in production
+    payment_date = db.Column(db.DateTime, default=datetime.utcnow)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -509,6 +522,61 @@ def course_progress(course_id):
     # Render the course progress page with course and progress data
     return render_template('course_progress.html', course=course, progress_data=progress_data)
 
+@app.route('/payment', methods=['GET', 'POST'])
+def payment():
+    if request.method == 'POST':
+        try:
+            # Get and validate form data
+            card_name = request.form.get('card_name', '').strip()
+            card_number = request.form.get('card_number', '').replace(" ", "")
+            amount = float(request.form.get('amount', '0'))
+            expiry = request.form.get('expiry', '').strip()
+            cvv = request.form.get('cvv', '').strip()
+
+            # Enhanced validation
+            if not all([card_name, card_number, expiry, cvv]):
+                flash('All fields are required', 'error')
+                return render_template('payment.html')
+            
+            if amount <= 0:
+                flash('Amount must be positive', 'error')
+                return render_template('payment.html')
+
+            if not card_number.isdigit() or len(card_number) not in (13, 14, 15, 16):
+                flash('Invalid card number', 'error')
+                return render_template('payment.html')
+
+            if not all(x.isdigit() for x in cvv) or len(cvv) not in (3, 4):
+                flash('Invalid CVV', 'error')
+                return render_template('payment.html')
+
+            # Process payment (store only last 4 digits)
+            payment = Payment(
+                card_name=card_name,
+                card_number=card_number[-4:],
+                amount=amount,
+                expiry=expiry,
+                cvv='***',
+                payment_date=datetime.utcnow()
+            )
+
+            db.session.add(payment)
+            db.session.commit()
+            if 'user_id' in session:
+                   user = users.query.get(session['user_id'])
+                   if user:
+                       user.is_subscribed = True
+                       db.session.commit()
+            flash('Payment processed successfully!', 'success')
+            return redirect(url_for('payment'))
+
+        except ValueError:
+            flash('Invalid amount format', 'error')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Payment failed: {str(e)}', 'error')
+
+    return render_template('payment.html')
 
 with app.app_context():
     db.create_all()
