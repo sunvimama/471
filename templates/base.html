@@ -17,7 +17,7 @@
     <a href="#" class="sidebar-item"><i class="fas fa-user"></i><span>You</span></a>
     <a href="{{ url_for('starred_notes') }}" class="sidebar-item"><i class="fas fa-star"></i><span>Starred Notes</span></a>
     <a href="{{ url_for('videos') }}" class="sidebar-item"><i class="fas fa-play-circle"></i><span>Videos</span></a>
-    <a href="#" class="sidebar-item"><i class="fas fa-history"></i><span>Activity History</span></a>
+    <a href="{{ url_for('activity') }}" class="sidebar-item"><i class="fas fa-history"></i><span>Activity History</span></a>
     <div class="sidebar-divider"></div>
     <a href="#" class="sidebar-item"><i class="fas fa-chalkboard-teacher"></i><span>Teacher's Tab</span></a>
     <a href="{{ url_for('upload_video') }}" class="sidebar-item"><i class="fas fa-upload"></i><span>Upload Video</span></a>

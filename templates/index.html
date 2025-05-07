@@ -18,7 +18,9 @@
       <i class="fas fa-star"></i><span>Starred Notes</span>
     </a>    
     <div class="sidebar-item"><i class="fas fa-video"></i><span>One-on-One</span></div>
-    <div class="sidebar-item"><i class="fas fa-history"></i><span>Activity History</span></div>
+    <a href="{{ url_for('activity') }}" class="sidebar-item">
+      <i class="fas fa-history"></i><span>Activity History</span>
+    </a>
     <div class="sidebar-divider"></div>
     <div class="sidebar-item"><i class="fas fa-chalkboard-teacher"></i><span>Teacher's Tab</span></div>
     <!-- Upload Video Button -->

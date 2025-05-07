@@ -3,16 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <title>Activity History | StudyHive</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='static/css/style.css') }}">
 </head>
 <body>
+  <h2>Notifications</h2>
+
+  {% if notifications %}
+    <ul>
+      {% for notification in notifications %}
+        <li>
+          <strong>{{ notification.timestamp.strftime('%Y-%m-%d %H:%M') }}</strong>: 
+          {{ notification.message }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No notifications available.</p>
+  {% endif %}
+
   <h2>Activity History</h2>
 
   {% if logs %}
     <ul>
       {% for log in logs %}
-        <li>
-          <strong>{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</strong>: {{ log.action }}
+        <li></li>
+          <strong>{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</strong>: 
+          {% if log.action == 'new_course' %}
+            A new course "{{ log.details }}" has been added.
+          {% elif log.action == 'new_note' %}
+            A new note "{{ log.details }}" has been created.
+          {% elif log.action == 'opened_note' %}
+            The note "{{ log.details }}" has been opened.
+          {% elif log.action == 'completed_course' %}
+            The course "{{ log.details }}" has been completed.
+          {% else %}
+            {{ log.action }}
+          {% endif %}
         </li>
       {% endfor %}
     </ul>

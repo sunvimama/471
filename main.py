@@ -7,12 +7,14 @@ from flask_login import LoginManager, UserMixin, current_user
 from flask_login import login_required
 
 
+
+
 login_manager = LoginManager()
 
 local_server = True
 app = Flask(__name__)
 app.secret_key = 'sunvi'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/suh'  # Replace with your actual DB URI
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/sut'  # Replace with your actual DB URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 login_manager.init_app(app)
 
@@ -65,10 +67,11 @@ class StarredNote(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     note_id = db.Column(db.Integer, db.ForeignKey('notes.id'), nullable=False)
 
-class users(UserMixin,db.Model):
+class users(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)  # True for admin, False for regular user
     is_subscribed = db.Column(db.Boolean, default=False)  # Track subscription status
     starred_notes = db.relationship('StarredNote', backref='user', lazy=True)
 
@@ -114,17 +117,23 @@ class Video(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return users.query.get(int(user_id))
 # -----------------------------
 # Routes
 # -----------------------------
 
 @app.route('/')
+
 def index():
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
     user_id = session['user_id']
+    user = users.query.get(user_id)
+
+    # Redirect to admin dashboard if the user is an admin
+    if user.is_admin:
+        return redirect(url_for('admin_dashboard'))
 
     # Fetch the 5 most recent notes
     recent_notes = notes.query.filter_by(user_id=user_id).order_by(notes.id.desc()).limit(5).all()
@@ -169,19 +178,117 @@ def create_note():
 
     return render_template('create_note.html')
 
+@app.route('/profile')
+@login_required
+def profile():
+    user_id = session['user_id']
+    user = users.query.get(user_id)
+    return render_template('profile.html', user=user)
+
+@app.route('/update_profile', methods=['GET', 'POST'])
+@login_required
+def update_profile():
+    user_id = session['user_id']
+    user = users.query.get(user_id)
+
+    if request.method == 'POST':
+        user.username = request.form['username']
+        #user.email = request.form['email']
+        db.session.commit()
+        return redirect(url_for('profile'))
+
+    return render_template('update_profile.html', user=user)
+
+@app.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    user_id = session['user_id']
+    user = users.query.get(user_id)
+
+    if request.method == 'POST':
+        current_password = request.form['current_password']
+        new_password = request.form['new_password']
+
+        if user.password == current_password:  # Replace with hashed password check
+            user.password = new_password  # Hash the new password before saving
+            db.session.commit()
+            return redirect(url_for('profile'))
+        else:
+            return render_template('change_password.html', error="Incorrect current password")
+
+    return render_template('change_password.html')
+
+@app.route('/admin')
+@login_required
+def admin_dashboard():
+    print("Session User ID:", session.get('user_id'))
+
+    user_id = session.get('user_id')
+    if not user_id:
+        print("User is not authenticated")
+        return redirect(url_for('login'))
+
+    user = users.query.get(user_id)
+    if not user or not user.is_admin:
+        print("User is not an admin")
+        return redirect(url_for('index', error="You are not authorized to access the admin dashboard."))
+
+    print("User is an admin")
+    all_users = users.query.all()
+    all_courses = Course.query.all()
+
+    return render_template('admin_dash.html', users=all_users, courses=all_courses)
+
+@app.route('/approve_course/<int:course_id>', methods=['POST'])
+@login_required
+def approve_course(course_id):
+    user_id = session['user_id']
+    user = users.query.get(user_id)
+
+    if not user.role:
+        return redirect(url_for('index'))
+
+    course = Course.query.get(course_id)
+    course.is_approved = True  # Add an `is_approved` field to the `Course` model
+    db.session.commit()
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/remove_user/<int:user_id>', methods=['POST'])
+@login_required
+def remove_user(user_id):
+    admin_id = session['user_id']
+    admin = users.query.get(admin_id)
+
+    if not admin.is_admin:
+        return redirect(url_for('index'))
+
+    user = users.query.get(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    return redirect(url_for('admin_dashboard'))
+
+
+
 @app.route('/notepad/<int:note_id>')
 def notepad(note_id):
     note = notes.query.get_or_404(note_id)
     return render_template('notepad.html', note=note)
 
+import bcrypt
 @app.route('/login', methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form['username']
         password = request.form['password']
+        print(f"Username: {username}, Password: {password}")
 
-        user = users.query.filter_by(username=username, password=password).first()
+        user = users.query.filter_by(username=username).first()
         if user:
+            print(f"User found: {user.username}, Password in DB: {user.password}")
+        else:
+            print("User not found")
+
+        if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
             session['username'] = username
             session['user_id'] = user.id 
             return redirect(url_for('index'))
@@ -201,12 +308,16 @@ def signup():
     if request.method == 'POST':
         uname = request.form['username']
         pwd = request.form['password']
-        existing_user = users.query.filter_by(username=uname).first()
+        is_admin = request.form.get('is_admin') == 'on'  # Checkbox for admin signup
 
+        existing_user = users.query.filter_by(username=uname).first()
         if existing_user:
             return render_template('signup.html', error='Username already exists')
 
-        new_user = users(username=uname, password=pwd)
+        # Hash the password before storing it
+        hashed_pwd = bcrypt.hashpw(pwd.encode('utf-8'), bcrypt.gensalt())
+
+        new_user = users(username=uname, password=hashed_pwd.decode('utf-8'), is_admin=is_admin)
         try:
             db.session.add(new_user)
             db.session.commit()
@@ -339,13 +450,17 @@ def activity():
         return redirect(url_for('login'))
 
     # Fetch activity logs
-    logs = ActivityLog.query.filter_by(user_id=user_id).order_by(ActivityLog.timestamp.desc()).all()
+    logs = ActivityLog.query.filter_by(user_id=user_id).order_by(ActivityLog.timestamp.desc()).limit(10).all()
+
+    # Fetch unread notifications
+    notifications = Notification.query.filter_by(user_id=user_id, is_read=False).order_by(Notification.timestamp.desc()).all()
 
     # Mark all notifications as read
-    Notification.query.filter_by(user_id=user_id, is_read=False).update({'is_read': True})
+    for notification in notifications:
+        notification.is_read = True
     db.session.commit()
 
-    return render_template('activity.html', activities=logs)
+    return render_template('activity.html', activities=logs, notifications=notifications)
 
 @app.route('/upload_course', methods=['GET', 'POST'])
 def upload_course():

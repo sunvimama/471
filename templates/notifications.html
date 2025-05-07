@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Notifications | StudyHive</title>
+  <title>Notifications & Activity History | StudyHive</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
@@ -26,6 +26,21 @@
     </ul>
   {% else %}
     <p>No notifications.</p>
+  {% endif %}
+
+  <h2>Activity History</h2>
+
+  {% if activity_history %}
+    <ul>
+      {% for activity in activity_history %}
+        <li style="margin-bottom: 10px;">
+          <strong>{{ activity.timestamp.strftime('%Y-%m-%d %H:%M') }}</strong><br>
+          <span>{{ activity.description }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No recent activity.</p>
   {% endif %}
 
   <a href="{{ url_for('index') }}">← Back to Dashboard</a>
