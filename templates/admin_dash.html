@@ -3,6 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin Dashboard</title>
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5; /* Off-white background */
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+    
+        h1 {
+            color: #2c3e50; /* Dark blue */
+            border-bottom: 2px solid #3498db; /* Bright blue */
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+    
+        h2 {
+            color: #2980b9; /* Medium blue */
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+    
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+            background-color: white;
+        }
+    
+        th {
+            background-color: #3498db; /* Bright blue */
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+    
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+    
+        tr:nth-child(even) {
+            background-color: #f9f9f9; /* Lighter off-white */
+        }
+    
+        tr:hover {
+            background-color: #e8f4fc; /* Very light blue */
+        }
+    
+        /* Button Styles */
+        button {
+            background-color: #3498db; /* Bright blue */
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+    
+        button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
+    
+        /* Form Styles */
+        form {
+            margin: 0;
+        }
+    
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            table {
+                font-size: 14px;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
 </head>
 <body>
     <h1>Admin Dashboard</h1>
@@ -25,10 +114,12 @@
                     <td>{{ user.email }}</td>
                     <td>{{ user.role }}</td>
                     <td>
-                        {% if user.role != 'admin' %}
+                        {% if not user.is_admin %}
                             <form action="{{ url_for('remove_user', user_id=user.id) }}" method="POST" style="display:inline;">
-                                <button type="submit">Remove</button>
+                                <button type="submit" onclick="return confirm('Are you sure you want to remove this user?');">Remove</button>
                             </form>
+                        {% else %}
+                            <span>Admin</span>
                         {% endif %}
                     </td>
                 </tr>

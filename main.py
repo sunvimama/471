@@ -4,7 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from werkzeug.utils import secure_filename
 from flask_login import LoginManager, UserMixin, current_user
-from flask_login import login_required
+
+from flask_login import login_required, login_user
 
 
 
@@ -42,7 +43,7 @@ class Course(db.Model):
     title = db.Column(db.String(150), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     videos = db.relationship('CourseVideo', backref='course', lazy=True)
-
+    user = db.relationship('users', backref='courses')
 class CourseVideo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     week = db.Column(db.Integer, nullable=False)  # Week number (1, 2, 3)
@@ -74,7 +75,6 @@ class users(UserMixin, db.Model):
     is_admin = db.Column(db.Boolean, default=False, nullable=False)  # True for admin, False for regular user
     is_subscribed = db.Column(db.Boolean, default=False)  # Track subscription status
     starred_notes = db.relationship('StarredNote', backref='user', lazy=True)
-
 class Comments(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     content = db.Column(db.Text, nullable=False)
@@ -121,9 +121,7 @@ def load_user(user_id):
 # -----------------------------
 # Routes
 # -----------------------------
-
 @app.route('/')
-
 def index():
     if 'user_id' not in session:
         return redirect(url_for('login'))
@@ -133,16 +131,18 @@ def index():
 
     # Redirect to admin dashboard if the user is an admin
     if user.is_admin:
-        return redirect(url_for('admin_dashboard'))
+        all_users = users.query.all()
+        all_courses = Course.query.all()
 
-    # Fetch the 5 most recent notes
-    recent_notes = notes.query.filter_by(user_id=user_id).order_by(notes.id.desc()).limit(5).all()
+        return render_template('admin_dash.html', users=all_users, courses=all_courses)
+    else:
+        recent_notes = notes.query.filter_by(user_id=user_id).order_by(notes.id.desc()).limit(5).all()
 
     # Fetch the starred notes
-    starred_note_ids = [star.note_id for star in StarredNote.query.filter_by(user_id=user_id).all()]
-    starred_notes = notes.query.filter(notes.id.in_(starred_note_ids)).all()
+        starred_note_ids = [star.note_id for star in StarredNote.query.filter_by(user_id=user_id).all()]
+        starred_notes = notes.query.filter(notes.id.in_(starred_note_ids)).all()
 
-    return render_template('index.html', recent_notes=recent_notes, starred_notes=starred_notes)
+        return render_template('index.html', recent_notes=recent_notes, starred_notes=starred_notes)
 
 @app.route('/create_note', methods=["GET", "POST"])
 def create_note():
@@ -221,23 +221,17 @@ def change_password():
 @app.route('/admin')
 @login_required
 def admin_dashboard():
-    print("Session User ID:", session.get('user_id'))
-
-    user_id = session.get('user_id')
-    if not user_id:
-        print("User is not authenticated")
-        return redirect(url_for('login'))
-
+    user_id = session['user_id']
     user = users.query.get(user_id)
-    if not user or not user.is_admin:
-        print("User is not an admin")
-        return redirect(url_for('index', error="You are not authorized to access the admin dashboard."))
 
-    print("User is an admin")
+    if not user.is_admin:
+        return redirect(url_for('index'))
     all_users = users.query.all()
+    all_notes = notes.query.all()
     all_courses = Course.query.all()
-
-    return render_template('admin_dash.html', users=all_users, courses=all_courses)
+    all_comments = Comments.query.all()
+    all_notifications = Notification.query.all()
+    return render_template('admin_dash.html', all_users=all_users, all_notes=all_notes, all_courses=all_courses, all_comments=all_comments, all_notifications=all_notifications)
 
 @app.route('/approve_course/<int:course_id>', methods=['POST'])
 @login_required
@@ -256,16 +250,30 @@ def approve_course(course_id):
 @app.route('/remove_user/<int:user_id>', methods=['POST'])
 @login_required
 def remove_user(user_id):
-    admin_id = session['user_id']
+    # Get the current logged-in user
+    admin_id = session.get('user_id')
     admin = users.query.get(admin_id)
 
-    if not admin.is_admin:
-        return redirect(url_for('index'))
+    # Check if the logged-in user is an admin
+    if not admin or not admin.is_admin:
+        return redirect(url_for('index', error="You are not authorized to perform this action."))
 
+    # Fetch the user to be removed
     user = users.query.get(user_id)
-    db.session.delete(user)
-    db.session.commit()
-    return redirect(url_for('admin_dashboard'))
+    if not user:
+        return redirect(url_for('admin_dashboard', error="User not found."))
+
+    # Prevent admin users from being removed
+    if user.is_admin:
+        return redirect(url_for('admin_dashboard', error="Cannot remove an admin user."))
+
+    # Remove the user
+    try:
+        db.session.delete(user)
+        db.session.commit()
+        return redirect(url_for('admin_dashboard', success="User removed successfully."))
+    except Exception as e:
+        return redirect(url_for('admin_dashboard', error=f"Error removing user: {str(e)}"))
 
 
 
@@ -274,29 +282,22 @@ def notepad(note_id):
     note = notes.query.get_or_404(note_id)
     return render_template('notepad.html', note=note)
 
-import bcrypt
 @app.route('/login', methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form['username']
         password = request.form['password']
-        print(f"Username: {username}, Password: {password}")
 
-        user = users.query.filter_by(username=username).first()
+        user = users.query.filter_by(username=username, password=password).first()
         if user:
-            print(f"User found: {user.username}, Password in DB: {user.password}")
-        else:
-            print("User not found")
-
-        if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
             session['username'] = username
-            session['user_id'] = user.id 
+            session['user_id'] = user.id
+            login_user(user)  # Use Flask-Login to log in the user
             return redirect(url_for('index'))
         else:
             return render_template('login.html', error="Invalid credentials")
 
     return render_template('login.html')
-
 @app.route('/logout')
 def logout():
     session.pop('username', None)
