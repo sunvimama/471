@@ -20,7 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `suh`
 --
-
+create database suh;
+use suh;
 -- --------------------------------------------------------
 
 --
@@ -248,6 +249,7 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `username` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL,
+  'is_admin' tinyint(1) DEFAULT NULL
   `is_subscribed` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -255,10 +257,12 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `password`, `is_subscribed`) VALUES
-(1, 'sharanali', 'qwerty', 0),
-(2, 'afif', 'asdfg', 1),
-(3, 'newuser', '1234', 0);
+INSERT INTO 'users' ('id', 'username', 'password', 'is_subscribed', 'is_admin') VALUES
+(1, 'sharanali', 'qwerty', 0, 0),
+(2, 'afif', 'asdfg', 1, 0),
+(3, 'newuser', '1234', 0, 1),
+(4, 'admin', 'admin', 0, 1),
+(5, 'sad', 'sad', 0, 1);
 
 -- --------------------------------------------------------
 
