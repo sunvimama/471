@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 23, 2025 at 10:28 PM
+-- Generation Time: May 07, 2025 at 04:45 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,10 +18,9 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `suh`
+-- Database: `sut`
 --
-create database suh;
-use suh;
+
 -- --------------------------------------------------------
 
 --
@@ -52,7 +51,7 @@ CREATE TABLE `alembic_version` (
 --
 
 INSERT INTO `alembic_version` (`version_num`) VALUES
-('133de69e89a2');
+('017602b47c23');
 
 -- --------------------------------------------------------
 
@@ -95,20 +94,6 @@ CREATE TABLE `course` (
 
 INSERT INTO `course` (`id`, `title`, `user_id`) VALUES
 (1, 'abacus', 2);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `coursevideo`
---
-
-CREATE TABLE `coursevideo` (
-  `id` int(11) NOT NULL,
-  `week` int(11) NOT NULL,
-  `title` varchar(100) NOT NULL,
-  `file_path` varchar(255) NOT NULL,
-  `course_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -177,33 +162,34 @@ CREATE TABLE `notes` (
 --
 
 INSERT INTO `notes` (`Title`, `des`, `tags`, `categories`, `ispublic`, `note`, `id`, `user_id`) VALUES
-('ssd', 'asda', 'ASDAS', 'ASD', 1, 'WDDFFWF', 1, 0),
-('hi', 'bye', 'ok', 'cool', 1, 'skkkrt', 2, 0),
-('welcome', 'thanks', 'wow', 'crazy', 1, 'notttte', 3, 0),
-('notepad', 'hello', 'sssd', 'note', 0, 'ooo', 4, 0),
-('asdf', 'waeq', 'qweq', 'qweq', 0, 'q', 5, 0),
-('as', 'sff', 'safafs', 'asfasf', 0, 'aw', 6, 0),
-('hi', 'asd', 'asd', 'asd', 0, 'asda', 7, 0),
-('ddd', 'diiddy', 'asasd', 'asdw', 0, 'qwe', 8, 0),
-('sdfsdf', 'deded', 'saas', 'asdasd', 0, 's', 9, 0),
-('sdfsdf', 'deded', 'saas', 'asdasd', 0, 's', 10, 0),
-('qwed', 'qwde', 'qweqweq', 'qweqwe', 0, 'qweqw', 11, 0),
-('study', 'emni', 'math', 'math', 0, 'hi', 12, 0),
-('test1', 'star testing', '', '', 0, 'test', 13, 0),
-('new test', 'new star test', '', '', 0, 'star test', 14, 0),
-('test2', 'test star', '', '', 0, 'star test', 15, 0),
-('test3', 'star test3', '', '', 0, 'star test3', 16, 0),
-('test4', 'test4', '', '', 0, 'test4', 17, 0),
-('testttt', 'testtt', '', '', 0, 'testtt', 18, 0),
-('gg', 'gg', '', '', 0, 'gg', 19, 0),
-('ff', 'ff', '', '', 0, 'ff', 20, 0),
-('hh', 'hh', '', '', 0, 'hh', 21, 0),
-('ee', 'ee', '', '', 0, '<p>&lt;p&gt;&amp;lt;p&amp;gt;&amp;amp;lt;p&amp;amp;gt;&amp;amp;amp;lt;p&amp;amp;amp;gt;&amp;amp;amp;amp;lt;p&amp;amp;amp;amp;gt;&amp;amp;amp;amp;amp;lt;p&amp;amp;amp;amp;amp;gt;ee&amp;amp;amp;amp;amp;lt;/p&amp;amp;amp;amp;amp;gt;&amp;amp;amp;amp;lt;/p&amp;amp;amp;amp;gt;&amp;amp;amp;lt;/p&amp;amp;amp;gt;&amp;amp;lt;/p&amp;amp;gt;&amp;lt;/p&amp;gt;&lt;/p&gt;</p>', 22, 0),
-('jj', 'jj', '', '', 0, '<p>jj</p>', 23, 0),
+('ssd', 'asda', 'ASDAS', 'ASD', 1, 'WDDFFWF', 1, 1),
+('hi', 'bye', 'ok', 'cool', 1, 'skkkrt', 2, 1),
+('welcome', 'thanks', 'wow', 'crazy', 1, 'notttte', 3, 1),
+('notepad', 'hello', 'sssd', 'note', 0, 'ooo', 4, 1),
+('asdf', 'waeq', 'qweq', 'qweq', 0, 'q', 5, 1),
+('as', 'sff', 'safafs', 'asfasf', 0, 'aw', 6, 1),
+('hi', 'asd', 'asd', 'asd', 0, 'asda', 7, 1),
+('ddd', 'diiddy', 'asasd', 'asdw', 0, 'qwe', 8, 1),
+('sdfsdf', 'deded', 'saas', 'asdasd', 0, 's', 9, 1),
+('sdfsdf', 'deded', 'saas', 'asdasd', 0, 's', 10, 1),
+('qwed', 'qwde', 'qweqweq', 'qweqwe', 0, 'qweqw', 11, 1),
+('study', 'emni', 'math', 'math', 0, 'hi', 12, 1),
+('test1', 'star testing', '', '', 0, 'test', 13, 1),
+('new test', 'new star test', '', '', 0, 'star test', 14, 1),
+('test2', 'test star', '', '', 0, 'star test', 15, 1),
+('test3', 'star test3', '', '', 0, 'star test3', 16, 1),
+('test4', 'test4', '', '', 0, 'test4', 17, 1),
+('testttt', 'testtt', '', '', 0, 'testtt', 18, 1),
+('gg', 'gg', '', '', 0, 'gg', 19, 1),
+('ff', 'ff', '', '', 0, 'ff', 20, 1),
+('hh', 'hh', '', '', 0, 'hh', 21, 1),
+('ee', 'ee', '', '', 0, '<p>&lt;p&gt;&amp;lt;p&amp;gt;&amp;amp;lt;p&amp;amp;gt;&amp;amp;amp;lt;p&amp;amp;amp;gt;&amp;amp;amp;amp;lt;p&amp;amp;amp;amp;gt;&amp;amp;amp;amp;amp;lt;p&amp;amp;amp;amp;amp;gt;ee&amp;amp;amp;amp;amp;lt;/p&amp;amp;amp;amp;amp;gt;&amp;amp;amp;amp;lt;/p&amp;amp;amp;amp;gt;&amp;amp;amp;lt;/p&amp;amp;amp;gt;&amp;amp;lt;/p&amp;amp;gt;&amp;lt;/p&amp;gt;&lt;/p&gt;</p>', 22, 1),
+('jj', 'jj', '', '', 0, '<p>jj</p>', 23, 1),
 ('hello world', 'hi', '', '', 0, 'bye', 24, 3),
 ('test final', 'im tired', '', '', 0, '*dies', 25, 3),
 ('hi', 'wrw', 'math', 'st', 0, 'tutu', 26, 2),
-('asdad', 'asdaaf', 'awd', 'fe', 0, 'sdad', 27, 2);
+('asdad', 'asdaaf', 'awd', 'fe', 0, 'sdad', 27, 2),
+('admin', 'admin', '', '', 0, 'admin', 28, 4);
 
 -- --------------------------------------------------------
 
@@ -217,6 +203,22 @@ CREATE TABLE `notification` (
   `is_read` tinyint(1) DEFAULT NULL,
   `user_id` int(11) DEFAULT NULL,
   `timestamp` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `payments`
+--
+
+CREATE TABLE `payments` (
+  `id` int(11) NOT NULL,
+  `card_name` varchar(100) NOT NULL,
+  `card_number` varchar(16) NOT NULL,
+  `amount` float NOT NULL,
+  `expiry` varchar(5) NOT NULL,
+  `cvv` varchar(3) NOT NULL,
+  `payment_date` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -249,20 +251,20 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `username` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL,
-  'is_admin' tinyint(1) DEFAULT NULL
-  `is_subscribed` tinyint(1) DEFAULT 0
+  `is_subscribed` tinyint(1) DEFAULT 0,
+  `is_admin` tinyint(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO 'users' ('id', 'username', 'password', 'is_subscribed', 'is_admin') VALUES
-(1, 'sharanali', 'qwerty', 0, 0),
+INSERT INTO `users` (`id`, `username`, `password`, `is_subscribed`, `is_admin`) VALUES
+(1, 'sharanali', 'qwerty', 0, 1),
 (2, 'afif', 'asdfg', 1, 0),
-(3, 'newuser', '1234', 0, 1),
-(4, 'admin', 'admin', 0, 1),
-(5, 'sad', 'sad', 0, 1);
+(3, 'newuser', '1234', 0, 0),
+(4, 'admin', 'admin', 0, 0),
+(7, 'arbhalolagena', '$2b$12$4fduMhIATyfAkD0a1Y52V.5y9I2adDmOw5IJCfVHQOp1ih1KTC.XW', 0, 1);
 
 -- --------------------------------------------------------
 
@@ -320,13 +322,6 @@ ALTER TABLE `course`
   ADD KEY `user_id` (`user_id`);
 
 --
--- Indexes for table `coursevideo`
---
-ALTER TABLE `coursevideo`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `course_id` (`course_id`);
-
---
 -- Indexes for table `course_progress`
 --
 ALTER TABLE `course_progress`
@@ -345,7 +340,8 @@ ALTER TABLE `course_video`
 -- Indexes for table `notes`
 --
 ALTER TABLE `notes`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `notification`
@@ -353,6 +349,12 @@ ALTER TABLE `notes`
 ALTER TABLE `notification`
   ADD PRIMARY KEY (`id`),
   ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `payments`
+--
+ALTER TABLE `payments`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `starred_note`
@@ -398,12 +400,6 @@ ALTER TABLE `course`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `coursevideo`
---
-ALTER TABLE `coursevideo`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `course_progress`
 --
 ALTER TABLE `course_progress`
@@ -419,12 +415,18 @@ ALTER TABLE `course_video`
 -- AUTO_INCREMENT for table `notes`
 --
 ALTER TABLE `notes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `notification`
 --
 ALTER TABLE `notification`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `payments`
+--
+ALTER TABLE `payments`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -437,7 +439,7 @@ ALTER TABLE `starred_note`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `video`
@@ -467,13 +469,7 @@ ALTER TABLE `comments`
 -- Constraints for table `course`
 --
 ALTER TABLE `course`
-  ADD CONSTRAINT `course_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `coursevideo`
---
-ALTER TABLE `coursevideo`
-  ADD CONSTRAINT `coursevideo_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `course` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `course_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
 -- Constraints for table `course_progress`
@@ -487,6 +483,12 @@ ALTER TABLE `course_progress`
 --
 ALTER TABLE `course_video`
   ADD CONSTRAINT `course_video_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `course` (`id`);
+
+--
+-- Constraints for table `notes`
+--
+ALTER TABLE `notes`
+  ADD CONSTRAINT `notes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
 -- Constraints for table `notification`

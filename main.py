@@ -45,6 +45,7 @@ class CourseProgress(db.Model):
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
+    category = db.Column(db.String(50))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     videos = db.relationship('CourseVideo', backref='course', lazy=True)
     user = db.relationship('users', backref='courses')
@@ -598,8 +599,21 @@ def track_progress():
 
 @app.route('/courses')
 def courses():
-    all_courses = Course.query.all()
-    return render_template('courses.html', courses=all_courses)
+    search_query = request.args.get('q', '').strip()
+    category_filter = request.args.get('category', '').strip()
+
+    query = Course.query
+
+    if search_query:
+        query = query.filter(Course.title.ilike(f"%{search_query}%"))
+
+    if category_filter:
+        query = query.filter_by(category=category_filter)
+
+    filtered_courses = query.all()
+
+    return render_template('courses.html', courses=filtered_courses)
+
 
 @app.context_processor
 def inject_notifications_count():
