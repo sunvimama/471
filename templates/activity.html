@@ -3,7 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <title>Activity History | StudyHive</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='static/css/style.css') }}">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f8f9fa; /* Off-white background */
+      color: #212529; /* Dark text for readability */
+    }
+    h2 {
+      color: #0056b3; /* Blue color for headings */
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      margin: 10px 0;
+      background-color: #e9ecef; /* Light blue-gray background for list items */
+      padding: 10px;
+      border-radius: 5px;
+    }
+    a {
+      text-decoration: none;
+      color: #0056b3; /* Blue color for links */
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
   <h2>Notifications</h2>
