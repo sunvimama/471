@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{% block title %}StudyHive{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
   {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -16,27 +16,45 @@
     <a href="{{ url_for('index') }}" class="sidebar-item"><i class="fas fa-home"></i><span>Home</span></a>
     <a href="#" class="sidebar-item"><i class="fas fa-user"></i><span>You</span></a>
     <a href="{{ url_for('starred_notes') }}" class="sidebar-item"><i class="fas fa-star"></i><span>Starred Notes</span></a>
-    <a href="{{ url_for('videos') }}" class="sidebar-item"><i class="fas fa-play-circle"></i><span>Videos</span></a>
+    <a href="#" class="sidebar-item"><i class="fas fa-video"></i><span>One-on-One</span></a>
     <a href="{{ url_for('activity') }}" class="sidebar-item"><i class="fas fa-history"></i><span>Activity History</span></a>
     <div class="sidebar-divider"></div>
     <a href="#" class="sidebar-item"><i class="fas fa-chalkboard-teacher"></i><span>Teacher's Tab</span></a>
+    <a href="{{ url_for('upload_course') }}" class="sidebar-item upload-course" data-debug="upload-course"><i class="fas fa-upload"></i><span>Upload Course</span></a>
     <a href="{{ url_for('upload_video') }}" class="sidebar-item"><i class="fas fa-upload"></i><span>Upload Video</span></a>
+    <a href="{{ url_for('payment') }}" class="sidebar-item"><i class="fas fa-credit-card"></i><span>Payment</span></a>
   </div>
 
   <!-- Main Content -->
   <div class="main-content">
-
     <!-- Top Navigation -->
     <div class="top-nav">
       <div class="nav-left">
         <h1>StudyHive</h1>
       </div>
       <div class="nav-center">
-        <div class="search-bar">
-          <i class="fas fa-search"></i>
-          <input type="text" placeholder="Search courses, materials..." />
-          <i class="fas fa-filter"></i>
-        </div>
+        <form method="get" action="{{ url_for('courses') }}">
+          <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input 
+              type="text" 
+              name="q" 
+              placeholder="Search courses, materials..." 
+              value  
+              value="{{ request.args.get('q', '') }}" 
+            />
+            <i class="fas fa-filter nav-icon" id="filterToggle" style="cursor: pointer;"></i>
+            <div class="dropdown" id="filterDropdown" style="display: none; flex-direction: column; position: absolute; background-color: white; padding: 10px; border: 1px solid #ccc; border-radius: 5px; z-index: 10;">
+              <label for="category" style="margin-bottom: 5px;">Filter by Category:</label>
+              <select name="category" id="category">
+                <option value="">All Categories</option>
+                <option value="Technology" {% if request.args.get('category') == 'Technology' %}selected{% endif %}>Technology</option>
+                <option value="Biology" {% if request.args.get('category') == 'Biology' %}selected{% endif %}>Biology</option>
+              </select>
+              <button type="submit" style="margin-top: 10px;">Apply</button>
+            </div>
+          </div>
+        </form>
       </div>
       <div class="nav-icons">
         <div class="nav-icon" onclick="toggleDropdown('settingsDropdown')"><i class="fas fa-cog"></i></div>
@@ -45,16 +63,12 @@
           <span class="notification-badge">3</span>
         </div>
         <div class="profile-pic" onclick="toggleDropdown('profileDropdown')">AL</div>
-
-        <!-- Settings Dropdown -->
         <div class="dropdown" id="settingsDropdown">
           <a href="#">Change Password</a>
           <a href="#">Payment Settings</a>
           <a href="#">Support / Help Center</a>
           <a href="#">Log Out</a>
         </div>
-
-        <!-- Profile Dropdown -->
         <div class="dropdown" id="profileDropdown">
           <a href="#">View Profile</a>
           <a href="#">Your Subscription Plan</a>
@@ -64,7 +78,6 @@
 
     <!-- Page-specific content -->
     {% block content %}{% endblock %}
-
   </div>
 
   <script>
@@ -82,6 +95,21 @@
         document.querySelectorAll('.dropdown').forEach(el => el.style.display = 'none');
       }
     };
+
+    const filterToggle = document.getElementById('filterToggle');
+    const filterDropdown = document.getElementById('filterDropdown');
+    filterToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      filterDropdown.style.display = (filterDropdown.style.display === 'block') ? 'none' : 'block';
+    });
+    filterDropdown.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+    window.addEventListener('mousedown', (e) => {
+      if (!filterDropdown.contains(e.target) && e.target !== filterToggle) {
+        filterDropdown.style.display = 'none';
+      }
+    });
   </script>
 
   {% block extra_js %}{% endblock %}

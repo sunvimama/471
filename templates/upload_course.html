@@ -1,14 +1,35 @@
-<form method="POST" enctype="multipart/form-data">
-    <input type="text" name="course_title" placeholder="Course Title" required><br><br>
-
-    <label>Week 1 Video:</label>
-    <input type="file" name="week1_video" required><br><br>
-
-    <label>Week 2 Video:</label>
-    <input type="file" name="week2_video" required><br><br>
-
-    <label>Week 3 Video:</label>
-    <input type="file" name="week3_video" required><br><br>
-
-    <button type="submit">Create Course</button>
-</form>
+{% extends "base.html" %}
+{% block title %}Upload Course - StudyHive{% endblock %}
+{% block content %}
+  <div class="section">
+    <h2>Upload a New Course</h2>
+    <form method="POST" enctype="multipart/form-data" class="course-form">
+      <div class="form-group">
+        <label for="course_title">Course Title:</label>
+        <input type="text" id="course_title" name="course_title" placeholder="Enter course title" required>
+      </div>
+      <div class="form-group">
+        <label for="category_id">Category:</label>
+        <select id="category_id" name="category_id" required>
+          <option value="">Select a Category</option>
+          {% for category in categories %}
+            <option value="{{ category.id }}">{{ category.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="week1_video">Week 1 Video:</label>
+        <input type="file" id="week1_video" name="week1_video" accept="video/*" required>
+      </div>
+      <div class="form-group">
+        <label for="week2_video">Week 2 Video:</label>
+        <input type="file" id="week2_video" name="week2_video" accept="video/*" required>
+      </div>
+      <div class="form-group">
+        <label for="week3_video">Week 3 Video:</label>
+        <input type="file" id="week3_video" name="week3_video" accept="video/*" required>
+      </div>
+      <button type="submit" class="submit-button">Create Course</button>
+    </form>
+  </div>
+{% endblock %}

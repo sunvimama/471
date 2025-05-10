@@ -98,14 +98,15 @@
     </div>
 
     <!-- Quill.js Editor -->
-    <div id="editor">{{ note.note }}</div>
+    <div id="editor">{{ note.note | safe }}</div>
 
     <div class="editor-footer">
-        <!-- Correcting the URL to pass note_id -->
         <form action="{{ url_for('notepad', note_id=note.id) }}" method="POST">
             <input type="hidden" name="note_content" id="note_content">
             <button type="submit" id="save-btn">Save Note</button>
             <button type="button" id="clear-btn">Clear</button>
+            <!-- Download Button -->
+            <a href="{{ url_for('download_note', note_id=note.id) }}" class="editor-footer button">Download Note</a>
         </form>
     </div>
 </div>
@@ -177,7 +178,6 @@
             console.error("Star toggle failed", err);
         });
     });
-    
 
     // Auto Save (every 5 minutes)
     setInterval(() => {

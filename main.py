@@ -11,7 +11,9 @@ from flask_login import login_required, login_user
 from flask_login import login_required
 from datetime import datetime
 from flask import flash
-
+from flask import send_file
+import io
+from bs4 import BeautifulSoup
 
 
 login_manager = LoginManager()
@@ -148,16 +150,19 @@ def index():
     if user.is_admin:
         all_users = users.query.all()
         all_courses = Course.query.all()
-
         return render_template('admin_dash.html', users=all_users, courses=all_courses)
-    else:
-        recent_notes = notes.query.filter_by(user_id=user_id).order_by(notes.id.desc()).limit(5).all()
+    
+    # Fetch recent notes
+    recent_notes = notes.query.filter_by(user_id=user_id).order_by(notes.id.desc()).limit(5).all()
 
-    # Fetch the starred notes
-        starred_note_ids = [star.note_id for star in StarredNote.query.filter_by(user_id=user_id).all()]
-        starred_notes = notes.query.filter(notes.id.in_(starred_note_ids)).all()
+    # Fetch starred notes
+    starred_note_ids = [star.note_id for star in StarredNote.query.filter_by(user_id=user_id).all()]
+    starred_notes = notes.query.filter(notes.id.in_(starred_note_ids)).all()
 
-        return render_template('index.html', recent_notes=recent_notes, starred_notes=starred_notes)
+    # Fetch recent courses (e.g., created or enrolled by the user)
+    recent_courses = Course.query.filter_by(user_id=user_id).order_by(Course.id.desc()).limit(5).all()
+
+    return render_template('index.html', recent_notes=recent_notes, starred_notes=starred_notes, recent_courses=recent_courses)
 
 @app.route('/create_note', methods=["GET", "POST"])
 def create_note():
@@ -292,11 +297,66 @@ def remove_user(user_id):
 
 
 
-@app.route('/notepad/<int:note_id>')
+@app.route('/notepad/<int:note_id>', methods=['GET', 'POST'])
 def notepad(note_id):
     note = notes.query.get_or_404(note_id)
+    
+    # Check if the user is authorized to view/edit the note
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    if note.user_id != session['user_id'] and not note.ispublic:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    if request.method == 'POST':
+        # Get the updated note content from the form
+        note_content = request.form.get('note_content')
+        if note_content:
+            note.note = note_content  # Update the note's content
+            try:
+                db.session.commit()
+                flash('Note saved successfully!', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error saving note: {str(e)}', 'error')
+        return redirect(url_for('notepad', note_id=note_id))
+    
     return render_template('notepad.html', note=note)
-
+@app.route('/download_note/<int:note_id>')
+def download_note(note_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    note = notes.query.get_or_404(note_id)
+    # Check if the user owns the note or if it's public
+    if note.user_id != session['user_id'] and not note.ispublic:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    # Strip HTML tags from note content for plain text
+    soup = BeautifulSoup(note.note or '', 'html.parser')
+    plain_text = soup.get_text()
+    
+    # Create the text content for the file
+    content = f"Title: {note.Title}\n"
+    if note.des:
+        content += f"Description: {note.des}\n"
+    if note.tags:
+        content += f"Tags: {note.tags}\n"
+    if note.categories:
+        content += f"Category: {note.categories}\n"
+    content += f"Public: {'Yes' if note.ispublic else 'No'}\n\n"
+    content += f"Content:\n{plain_text}"
+    
+    # Create a BytesIO buffer to serve the file
+    buffer = io.BytesIO(content.encode('utf-8'))
+    buffer.seek(0)
+    
+    # Serve the file as a download
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=f"{note.Title}.txt",
+        mimetype='text/plain'
+    )
 @app.route('/login', methods=["GET", "POST"])
 def login():
     if request.method == "POST":
