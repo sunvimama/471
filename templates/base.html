@@ -14,12 +14,11 @@
   <div class="sidebar">
     <a href="{{ url_for('create_note') }}" class="sidebar-item"><i class="fas fa-plus"></i><span>Create</span></a>
     <a href="{{ url_for('index') }}" class="sidebar-item"><i class="fas fa-home"></i><span>Home</span></a>
-    <a href="#" class="sidebar-item"><i class="fas fa-user"></i><span>You</span></a>
+    <a href="{{ url_for('profile') }}" class="sidebar-item"><i class="fas fa-home"></i><span>You</span></a>
     <a href="{{ url_for('starred_notes') }}" class="sidebar-item"><i class="fas fa-star"></i><span>Starred Notes</span></a>
-    <a href="#" class="sidebar-item"><i class="fas fa-video"></i><span>One-on-One</span></a>
+     <a href="{{ url_for('subscription_status') }}" class="sidebar-item"><i class="fas fa-history"></i><span>one-one</span></a>
     <a href="{{ url_for('activity') }}" class="sidebar-item"><i class="fas fa-history"></i><span>Activity History</span></a>
     <div class="sidebar-divider"></div>
-    <a href="#" class="sidebar-item"><i class="fas fa-chalkboard-teacher"></i><span>Teacher's Tab</span></a>
     <a href="{{ url_for('upload_course') }}" class="sidebar-item upload-course" data-debug="upload-course"><i class="fas fa-upload"></i><span>Upload Course</span></a>
     <a href="{{ url_for('upload_video') }}" class="sidebar-item"><i class="fas fa-upload"></i><span>Upload Video</span></a>
     <a href="{{ url_for('payment') }}" class="sidebar-item"><i class="fas fa-credit-card"></i><span>Payment</span></a>
