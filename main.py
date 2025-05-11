@@ -8,6 +8,7 @@ from flask_login import LoginManager, UserMixin, current_user
 from flask_login import login_required, login_user
 
 
+
 from flask_login import login_required
 from datetime import datetime
 from flask import flash
@@ -390,10 +391,8 @@ def signup():
         if existing_user:
             return render_template('signup.html', error='Username already exists')
 
-        # Hash the password before storing it
-        hashed_pwd = bcrypt.hashpw(pwd.encode('utf-8'), bcrypt.gensalt())
-
-        new_user = users(username=uname, password=hashed_pwd.decode('utf-8'), is_admin=is_admin)
+        # Directly store the plain text password (not recommended for production)
+        new_user = users(username=uname, password=pwd, is_admin=is_admin)
         try:
             db.session.add(new_user)
             db.session.commit()
