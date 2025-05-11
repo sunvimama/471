@@ -374,8 +374,11 @@ def login():
             return render_template('login.html', error="Invalid credentials")
 
     return render_template('login.html')
+from flask_login import logout_user  # Ensure this import is at the top of the file
+
 @app.route('/logout')
 def logout():
+    logout_user()  # Log out the user using Flask-Login
     session.pop('username', None)
     session.pop('user_id', None)
     return redirect(url_for('index'))
