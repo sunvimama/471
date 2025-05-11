@@ -731,9 +731,10 @@ def payment():
                 flash('All fields are required', 'error')
                 return render_template('payment.html')
             
-            if amount <= 0:
-                flash('Amount must be positive', 'error')
+            if amount != 200:
+                flash('Amount must be exactly 200 Taka', 'error')
                 return render_template('payment.html')
+
 
             if not card_number.isdigit() or len(card_number) not in (13, 14, 15, 16):
                 flash('Invalid card number', 'error')
@@ -770,6 +771,10 @@ def payment():
             flash(f'Payment failed: {str(e)}', 'error')
 
     return render_template('payment.html')
+
+@app.route('/create')
+def create_options():
+    return render_template('create_options.html')
 
 with app.app_context():
     db.create_all()

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
     <title>StudyHive - Create Material</title>
     <style>
         * {
@@ -17,48 +18,6 @@
             background-color: #F9FAEE;
             min-height: 100vh;
         }
-        
-        .sidebar {
-            width: 60px;
-            background-color: #2c3e50;
-            color: white;
-            transition: width 0.3s ease;
-            overflow: hidden;
-            height: 100vh;
-            position: fixed;
-            z-index: 10;
-        }
-        
-        .sidebar:hover {
-            width: 220px;
-        }
-        
-        .sidebar-item {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        
-        .sidebar-item i {
-            font-size: 20px;
-        }
-        
-        .sidebar span {
-            margin-left: 15px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .sidebar:hover .sidebar-item span {
-            opacity: 1;
-        }
-        
-        .sidebar-item:hover {
-            background-color: #34495e;
-        }
-        
         .main-content {
             flex: 1;
             margin-left: 60px;
@@ -242,6 +201,85 @@
         .submit-btn:hover {
             background-color: #2980b9;
         }
+        .sidebar {
+            width: 60px;
+            background-color: #2c3e50;
+            color: #f5f6fa; /* Light gray for high contrast */
+            transition: width 0.3s ease;
+            overflow-y: auto; /* Allow scrolling to prevent cutoff */
+            height: 100vh;
+            position: fixed;
+            z-index: 10;
+            }
+
+            .sidebar:hover {
+            width: 220px;
+            }
+
+            .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            visibility: visible !important; /* Ensure all items are visible */
+            color: #f5f6fa; /* High-contrast text color */
+            }
+
+            .sidebar-item i {
+            font-size: 20px;
+            color: #ffffff; /* Default icon color */
+            }
+
+            .sidebar-item:hover i {
+            color: #ecf0f1; /* Hover color for icons */
+            }
+
+            .sidebar-item span {
+            margin-left: 15px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-weight: 500; /* Bolder text for readability */
+            font-size: 14px; /* Slightly larger for clarity */
+            }
+
+            .sidebar:hover .sidebar-item span {
+            opacity: 1;
+            }
+
+            .sidebar-item:hover {
+            background-color: #34495e;
+            color: #ffffff; /* Pure white on hover for maximum contrast */
+            }
+
+            /* Specific styling for Upload Course button */
+            .sidebar-item.upload-course {
+            display: flex !important;
+            visibility: visible !important;
+            background-color: #2c3e50; /* Slightly darker red for better contrast */
+            color: #ffffff; /* Pure white text for readability */
+            }
+
+            .sidebar-item.upload-course:hover {
+            background-color: #2c3e50; /* Darker red on hover */
+            color: #ffffff;
+            }
+
+            /* Ensure Upload Video and Upload Course icons are styled consistently */
+            .sidebar-item i.fas.fa-upload {
+            font-size: 20px;
+            color: #ffffff;
+            }
+
+            .sidebar-item:hover i.fas.fa-upload {
+            color: #ecf0f1;
+            }
+
+            .sidebar-divider {
+            height: 1px;
+            background-color: #34495e;
+            margin: 10px 0;
+            }
 
         @media (max-width: 768px) {
             .form-row {
@@ -256,6 +294,18 @@
     </style>
 </head>
 <body>
+    <div class="sidebar">
+        <a href="{{ url_for('create_options') }}" class="sidebar-item"><i class="fas fa-plus"></i><span>Create</span></a>
+        <a href="{{ url_for('index') }}" class="sidebar-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="{{ url_for('profile') }}" class="sidebar-item"><i class="fas fa-home"></i><span>You</span></a>
+        <a href="{{ url_for('starred_notes') }}" class="sidebar-item"><i class="fas fa-star"></i><span>Starred Notes</span></a>
+        <a href="{{ url_for('subscription_status') }}" class="sidebar-item"><i class="fas fa-history"></i><span>one-one</span></a>
+        <a href="{{ url_for('activity') }}" class="sidebar-item"><i class="fas fa-history"></i><span>Activity History</span></a>
+        <div class="sidebar-divider"></div>
+        <a href="{{ url_for('upload_course') }}" class="sidebar-item upload-course" data-debug="upload-course"><i class="fas fa-upload"></i><span>Upload Course</span></a>
+        <a href="{{ url_for('upload_video') }}" class="sidebar-item"><i class="fas fa-upload"></i><span>Upload Video</span></a>
+        <a href="{{ url_for('payment') }}" class="sidebar-item"><i class="fas fa-credit-card"></i><span>Payment</span></a>
+    </div>
     <div class="main-content">
         <!-- Create Material Form -->
         <div class="create-container">

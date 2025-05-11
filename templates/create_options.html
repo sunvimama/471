@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Create Options - StudyHive{% endblock %}
+{% block content %}
+  <div class="create-options-container">
+    <h1>Create New Content</h1>
+    <div class="create-options-grid">
+      <!-- Create Note Option -->
+      <a href="{{ url_for('create_note') }}" class="create-option">
+        <div class="option-icon">
+          <i class="fas fa-edit"></i>
+        </div>
+        <h3>Create Note</h3>
+        <p>Start a new text note with formatting options</p>
+      </a>
+
+      <!-- Upload Course Option -->
+      <a href="{{ url_for('upload_course') }}" class="create-option">
+        <div class="option-icon">
+          <i class="fas fa-book"></i>
+        </div>
+        <h3>Upload Course</h3>
+        <p>Upload and organize course materials</p>
+      </a>
+
+      <!-- Upload Video Option -->
+      <a href="{{ url_for('upload_video') }}" class="create-option">
+        <div class="option-icon">
+          <i class="fas fa-video"></i>
+        </div>
+        <h3>Upload Video</h3>
+        <p>Upload educational videos with metadata</p>
+      </a>
+    </div>
+  </div>
+{% endblock %}

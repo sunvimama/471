@@ -21,54 +21,93 @@
         .sidebar {
             width: 60px;
             background-color: #2c3e50;
-            color: white;
+            color: #f5f6fa; /* Light gray for high contrast */
             transition: width 0.3s ease;
-            overflow: hidden;
+            overflow-y: auto; /* Allow scrolling to prevent cutoff */
             height: 100vh;
             position: fixed;
             z-index: 10;
-        }
-        
-        .sidebar:hover {
+            }
+
+            .sidebar:hover {
             width: 220px;
-        }
-        
-        .sidebar-item {
+            }
+
+            .sidebar-item {
             display: flex;
             align-items: center;
             padding: 15px 20px;
             cursor: pointer;
             white-space: nowrap;
-        }
-        
-        .sidebar-item i {
+            visibility: visible !important; /* Ensure all items are visible */
+            color: #f5f6fa; /* High-contrast text color */
+            }
+
+            .sidebar-item i {
             font-size: 20px;
-        }
-        
-        .sidebar span {
+            color: #ffffff; /* Default icon color */
+            }
+
+            .sidebar-item:hover i {
+            color: #ecf0f1; /* Hover color for icons */
+            }
+
+            .sidebar-item span {
             margin-left: 15px;
             opacity: 0;
             transition: opacity 0.3s ease;
-        }
-        
-        .sidebar:hover .sidebar-item span {
+            font-weight: 500; /* Bolder text for readability */
+            font-size: 14px; /* Slightly larger for clarity */
+            }
+
+            .sidebar:hover .sidebar-item span {
             opacity: 1;
-        }
-        
-        .sidebar-item:hover {
+            }
+
+            .sidebar-item:hover {
             background-color: #34495e;
-        }
-        
-        .main-content {
+            color: #ffffff; /* Pure white on hover for maximum contrast */
+            }
+
+            /* Specific styling for Upload Course button */
+            .sidebar-item.upload-course {
+            display: flex !important;
+            visibility: visible !important;
+            background-color: #2c3e50; /* Slightly darker red for better contrast */
+            color: #ffffff; /* Pure white text for readability */
+            }
+
+            .sidebar-item.upload-course:hover {
+            background-color: #2c3e50; /* Darker red on hover */
+            color: #ffffff;
+            }
+
+            /* Ensure Upload Video and Upload Course icons are styled consistently */
+            .sidebar-item i.fas.fa-upload {
+            font-size: 20px;
+            color: #ffffff;
+            }
+
+            .sidebar-item:hover i.fas.fa-upload {
+            color: #ecf0f1;
+            }
+
+            .sidebar-divider {
+            height: 1px;
+            background-color: #34495e;
+            margin: 10px 0;
+            }
+
+            .main-content {
             flex: 1;
             margin-left: 60px;
             padding: 20px 30px;
             transition: margin-left 0.3s ease;
-        }
-        
-        .sidebar:hover ~ .main-content {
+            }
+
+            .sidebar:hover ~ .main-content {
             margin-left: 220px;
-        }
+            }
         
         .top-nav {
             display: flex;
@@ -226,36 +265,15 @@
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
-        <div class="sidebar-item">
-            <i class="fas fa-plus"></i>
-            <span>Create</span>
-        </div>
-        <div class="sidebar-item">
-            <i class="fas fa-home"></i>
-            <span>Home</span>
-        </div>
-        <div class="sidebar-item">
-            <i class="fas fa-user"></i>
-            <span>You</span>
-        </div>
-        <div class="sidebar-item">
-            <i class="fas fa-star"></i>
-            <span>Favourite</span>
-        </div>
-        <div class="sidebar-item">
-            <i class="fas fa-history"></i>
-            <span>History</span>
-        </div>
+        <a href="{{ url_for('create_options') }}" class="sidebar-item"><i class="fas fa-plus"></i><span>Create</span></a>
+        <a href="{{ url_for('index') }}" class="sidebar-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="{{ url_for('profile') }}" class="sidebar-item"><i class="fas fa-user"></i><span>You</span></a>
+        <a href="{{ url_for('starred_notes') }}" class="sidebar-item"><i class="fas fa-star"></i><span>Starred Notes</span></a>
+        <a href="{{ url_for('subscription_status') }}" class="sidebar-item"><i class="fas fa-video"></i><span>one-one</span></a>
+        <a href="{{ url_for('activity') }}" class="sidebar-item"><i class="fas fa-history"></i><span>Activity History</span></a>
         <div class="sidebar-divider"></div>
-        <div class="sidebar-item">
-            <i class="fas fa-chalkboard-teacher"></i>
-            <span>Teacher</span>
-        </div>
-        <div class="sidebar-item">
-            <i class="fas fa-credit-card"></i>
-            <span>Payment</span>
-        </div>
-        </div>
+        <a href="{{ url_for('upload_course') }}" class="sidebar-item upload-course" data-debug="upload-course"><i class="fas fa-upload"></i><span>Upload Course</span></a>
+        <a href="{{ url_for('upload_video') }}" class="sidebar-item"><i class="fas fa-upload"></i><span>Upload Video</span></a>
     </div>
 
     <!-- Main Content -->
@@ -276,6 +294,9 @@
         <div class="auth-container">
             <div class="auth-form">
                 <h2 class="auth-title">Secure Payment</h2>
+                <div class="alert alert-info">
+                    Pay <strong>200 Taka</strong> to get exclusive features.
+                </div>
                 
                 <!-- Flash messages -->
                 {% with messages = get_flashed_messages(with_categories=true) %}
