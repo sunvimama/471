@@ -19,11 +19,15 @@ from bs4 import BeautifulSoup
 
 login_manager = LoginManager()
 
-local_server = True
+local_server = False  
 app = Flask(__name__)
-app.secret_key = 'sunvi'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/sut'  # Replace with your actual DB URI
+app.secret_key = 'sunvi'  
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://sunvi:welcome234@sunvi.mysql.pythonanywhere-services.com/sunvi$sut'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['MYSQL_HOST'] = 'sunvi.mysql.pythonanywhere-services.com'
+app.config['MYSQL_USER'] = 'sunvi'
+app.config['MYSQL_PASSWORD'] = 'welcome234'
+app.config['MYSQL_DB'] = 'sunvi$sut'
 login_manager.init_app(app)
 
 # Set the upload folder for videos. Make sure the folder exists.
