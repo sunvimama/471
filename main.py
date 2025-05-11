@@ -19,26 +19,11 @@ from bs4 import BeautifulSoup
 
 login_manager = LoginManager()
 
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
-
+local_server = True
 app = Flask(__name__)
-app.secret_key = 'sunvi'  # Keep this secure in production
-
-# SQLAlchemy Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://sunvi1:welcome234@sunvi1.mysql.pythonanywhere-services.com/sunvi1$sut'
+app.secret_key = 'sunvi'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/sut'  # Replace with your actual DB URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-# Optional MySQL-specific configs (used if you use Flask-MySQL instead of SQLAlchemy)
-app.config['MYSQL_HOST'] = 'sunvi1.mysql.pythonanywhere-services.com'
-app.config['MYSQL_USER'] = 'sunvi1'
-app.config['MYSQL_PASSWORD'] = 'welcome234'
-app.config['MYSQL_DB'] = 'sunvi1$sut'
-
-# Initialize extensions
-db = SQLAlchemy(app)
-login_manager = LoginManager()
 login_manager.init_app(app)
 
 
