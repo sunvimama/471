@@ -19,16 +19,28 @@ from bs4 import BeautifulSoup
 
 login_manager = LoginManager()
 
-local_server = False  
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+
 app = Flask(__name__)
-app.secret_key = 'sunvi'  
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://sunvi:welcome234@sunvi.mysql.pythonanywhere-services.com/sunvi$sut'
+app.secret_key = 'sunvi'  # Keep this secure in production
+
+# SQLAlchemy Configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://sunvi1:welcome234@sunvi1.mysql.pythonanywhere-services.com/sunvi1$sut'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['MYSQL_HOST'] = 'sunvi.mysql.pythonanywhere-services.com'
-app.config['MYSQL_USER'] = 'sunvi'
+
+# Optional MySQL-specific configs (used if you use Flask-MySQL instead of SQLAlchemy)
+app.config['MYSQL_HOST'] = 'sunvi1.mysql.pythonanywhere-services.com'
+app.config['MYSQL_USER'] = 'sunvi1'
 app.config['MYSQL_PASSWORD'] = 'welcome234'
-app.config['MYSQL_DB'] = 'sunvi$sut'
+app.config['MYSQL_DB'] = 'sunvi1$sut'
+
+# Initialize extensions
+db = SQLAlchemy(app)
+login_manager = LoginManager()
 login_manager.init_app(app)
+
 
 # Set the upload folder for videos. Make sure the folder exists.
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads', 'videos')
